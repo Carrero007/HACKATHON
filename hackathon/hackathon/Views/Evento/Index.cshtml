@@ -1,0 +1,15 @@
+﻿@model List<hackathon.Models.Evento>
+<h2>Eventos</h2>
+@if (User.IsInRole("CRIADOR"))
+{
+    <a asp-action="Criar">Criar evento</a>
+}
+<ul>
+    @foreach (var e in Model)
+    {
+        <li>
+            <strong>@e.Titulo</strong> - @e.DataHora.ToString("dd/MM/yyyy HH:mm") - @e.Local
+            <a asp-action="Detalhes" asp-route-id="@e.Id">Ver detalhes</a>
+        </li>
+    }
+</ul>

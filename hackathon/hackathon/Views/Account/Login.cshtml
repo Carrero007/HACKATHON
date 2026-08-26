@@ -1,0 +1,11 @@
+﻿@model hackathon.Models.LoginViewModel
+<h2>Login</h2>
+<div asp-validation-summary="All"></div>
+<form asp-action="Login" method="post">
+    <label>Email</label>
+    <input asp-for="Email" />
+    <label>Senha</label>
+    <input asp-for="Senha" type="password" />
+    <button type="submit">Entrar</button>
+</form>
+<a asp-action="Cadastro">Criar conta</a>

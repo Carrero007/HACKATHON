@@ -1,0 +1,17 @@
+﻿@model hackathon.Models.CadastroViewModel
+<h2>Cadastro</h2>
+<div asp-validation-summary="All"></div>
+<form asp-action="Cadastro" method="post">
+    <label>Nome</label>
+    <input asp-for="Nome" />
+    <label>Email</label>
+    <input asp-for="Email" />
+    <label>Senha</label>
+    <input asp-for="Senha" type="password" />
+    <label>Perfil</label>
+    <select asp-for="Perfil">
+        <option value="ALUNO">Aluno</option>
+        <option value="CRIADOR">Criador</option>
+    </select>
+    <button type="submit">Cadastrar</button>
+</form>

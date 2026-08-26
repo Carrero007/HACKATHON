@@ -1,0 +1,16 @@
+﻿@model List<hackathon.Models.Evento>
+<h2>Meus Eventos</h2>
+<a asp-action="Criar">Criar evento</a>
+<ul>
+    @foreach (var e in Model)
+    {
+        <li>
+            @e.Titulo - @e.DataHora.ToString("dd/MM/yyyy")
+            <a asp-action="Editar" asp-route-id="@e.Id">EDITAR</a>
+            <a asp-action="Detalhes" asp-route-id="@e.Id">VER</a>
+            <form asp-action="Excluir" asp-route-id="@e.Id" method="post" style="display:inline">
+                <button type="submit">EXCLUIR</button>
+            </form>
+        </li>
+    }
+</ul>

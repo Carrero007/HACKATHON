@@ -1,0 +1,14 @@
+﻿@model hackathon.Models.Evento
+<h2>Editar Evento</h2>
+<div asp-validation-summary="All"></div>
+<form asp-action="Editar" asp-route-id="@Model.Id" method="post">
+    <label>Título</label>
+    <input asp-for="Titulo" />
+    <label>Descrição</label>
+    <textarea asp-for="Descricao"></textarea>
+    <label>Data e Hora</label>
+    <input asp-for="DataHora" type="datetime-local" />
+    <label>Local</label>
+    <input asp-for="Local" />
+    <button type="submit">SALVAR</button>
+</form>
