@@ -17,6 +17,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+app.UseStatusCodePagesWithRedirects("/Home/NaoEncontrado");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

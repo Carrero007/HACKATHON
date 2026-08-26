@@ -34,6 +34,20 @@
     <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" style="display:inline">
         <button type="submit">EXCLUIR</button>
     </form>
+
+    <hr />
+    <h3>QR CODE DE PRESENÇA</h3>
+    <div id="qrcode"></div>
+    <p>Escaneie este código para confirmar sua presença.</p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        new QRCode(document.getElementById("qrcode"), {
+            text: window.location.origin + "/Presenca/Confirmar?eventoId=@Model.Id",
+            width: 180,
+            height: 180
+        });
+    </script>
 }
 
 <hr />

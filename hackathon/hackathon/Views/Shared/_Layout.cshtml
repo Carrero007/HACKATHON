@@ -25,7 +25,7 @@
                     }
                     else if (User.IsInRole("ALUNO"))
                     {
-                        <a asp-controller="Evento" asp-action="Index">Minhas inscrições</a>
+                        <a asp-controller="Inscricao" asp-action="MinhasInscricoes">Minhas inscrições</a>
                     }
 
                     <span class="user-tag">@User.FindFirst("Nome")?.Value</span>

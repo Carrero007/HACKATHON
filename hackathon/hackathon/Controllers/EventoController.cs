@@ -141,23 +141,37 @@ namespace hackathon.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Criar(Evento model)
         {
-            if (string.IsNullOrWhiteSpace(model.Titulo))
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Título é obrigatório.");
                 return View(model);
             }
 
-            using var conn = _db.GetConnection();
-            var cmd = new SqlCommand(@"
-                INSERT INTO Eventos (CriadorId, Titulo, Descricao, DataHora, Local, Publicado)
-                VALUES (@CriadorId, @Titulo, @Descricao, @DataHora, @Local, 1)", conn);
-            cmd.Parameters.AddWithValue("@CriadorId", UsuarioId!.Value);
-            cmd.Parameters.AddWithValue("@Titulo", model.Titulo);
-            cmd.Parameters.AddWithValue("@Descricao", (object?)model.Descricao ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@DataHora", model.DataHora);
-            cmd.Parameters.AddWithValue("@Local", (object?)model.Local ?? DBNull.Value);
-            cmd.ExecuteNonQuery();
+            if (model.DataHora < DateTime.Now)
+            {
+                ModelState.AddModelError("DataHora", "A data do evento não pode estar no passado.");
+                return View(model);
+            }
 
+            try
+            {
+                using var conn = _db.GetConnection();
+                var cmd = new SqlCommand(@"
+            INSERT INTO Eventos (CriadorId, Titulo, Descricao, DataHora, Local, Publicado)
+            VALUES (@CriadorId, @Titulo, @Descricao, @DataHora, @Local, 1)", conn);
+                cmd.Parameters.AddWithValue("@CriadorId", UsuarioId!.Value);
+                cmd.Parameters.AddWithValue("@Titulo", model.Titulo.Trim());
+                cmd.Parameters.AddWithValue("@Descricao", (object?)model.Descricao?.Trim() ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@DataHora", model.DataHora);
+                cmd.Parameters.AddWithValue("@Local", (object?)model.Local?.Trim() ?? DBNull.Value);
+                cmd.ExecuteNonQuery();
+            }
+            catch (SqlException)
+            {
+                ModelState.AddModelError("", "Erro ao salvar o evento. Tente novamente.");
+                return View(model);
+            }
+
+            TempData["Sucesso"] = "Evento criado com sucesso!";
             return RedirectToAction("Index");
         }
 
@@ -175,30 +189,54 @@ namespace hackathon.Controllers
         }
 
         // POST /Evento/Editar/{id}
+        // POST /Evento/Editar/{id}
         [HttpPost]
         [Authorize(Roles = "CRIADOR")]
         [ValidateAntiForgeryToken]
         public IActionResult Editar(int id, Evento model)
         {
+            if (!ModelState.IsValid)
+            {
+                model.Id = id;
+                return View(model);
+            }
+
+            if (model.DataHora < DateTime.Now)
+            {
+                ModelState.AddModelError("DataHora", "A data do evento não pode estar no passado.");
+                model.Id = id;
+                return View(model);
+            }
+
             var eventoAtual = BuscarEventoSimples(id);
             if (eventoAtual == null) return NotFound();
 
             if (eventoAtual.CriadorId != UsuarioId!.Value)
                 return Forbid();
 
-            using var conn = _db.GetConnection();
-            var cmd = new SqlCommand(@"
-                UPDATE Eventos
-                SET Titulo = @Titulo, Descricao = @Descricao, DataHora = @DataHora, Local = @Local
-                WHERE Id = @Id AND CriadorId = @CriadorId", conn);
-            cmd.Parameters.AddWithValue("@Titulo", model.Titulo);
-            cmd.Parameters.AddWithValue("@Descricao", (object?)model.Descricao ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@DataHora", model.DataHora);
-            cmd.Parameters.AddWithValue("@Local", (object?)model.Local ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Id", id);
-            cmd.Parameters.AddWithValue("@CriadorId", UsuarioId.Value);
-            cmd.ExecuteNonQuery();
+            try
+            {
+                using var conn = _db.GetConnection();
+                var cmd = new SqlCommand(@"
+            UPDATE Eventos
+            SET Titulo = @Titulo, Descricao = @Descricao, DataHora = @DataHora, Local = @Local
+            WHERE Id = @Id AND CriadorId = @CriadorId", conn);
+                cmd.Parameters.AddWithValue("@Titulo", model.Titulo.Trim());
+                cmd.Parameters.AddWithValue("@Descricao", (object?)model.Descricao?.Trim() ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@DataHora", model.DataHora);
+                cmd.Parameters.AddWithValue("@Local", (object?)model.Local?.Trim() ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.Parameters.AddWithValue("@CriadorId", UsuarioId.Value);
+                cmd.ExecuteNonQuery();
+            }
+            catch (SqlException)
+            {
+                ModelState.AddModelError("", "Erro ao salvar as alterações. Tente novamente.");
+                model.Id = id;
+                return View(model);
+            }
 
+            TempData["Sucesso"] = "Evento atualizado com sucesso!";
             return RedirectToAction("Detalhes", new { id });
         }
 

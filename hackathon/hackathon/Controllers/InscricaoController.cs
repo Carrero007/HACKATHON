@@ -25,15 +25,21 @@ namespace hackathon.Controllers
         {
             using var conn = _db.GetConnection();
 
-            // Evento existe e está publicado?
+            // Evento existe, está publicado e ainda não ocorreu?
             var eventoCmd = new SqlCommand(
-                "SELECT COUNT(1) FROM Eventos WHERE Id = @EventoId AND Publicado = 1", conn);
+                "SELECT DataHora FROM Eventos WHERE Id = @EventoId AND Publicado = 1", conn);
             eventoCmd.Parameters.AddWithValue("@EventoId", eventoId);
-            var eventoExiste = (int)eventoCmd.ExecuteScalar() > 0;
+            var dataHoraObj = eventoCmd.ExecuteScalar();
 
-            if (!eventoExiste)
+            if (dataHoraObj == null)
             {
                 TempData["Erro"] = "Evento não encontrado ou não publicado.";
+                return RedirectToAction("Detalhes", "Evento", new { id = eventoId });
+            }
+
+            if ((DateTime)dataHoraObj < DateTime.Now)
+            {
+                TempData["Erro"] = "Este evento já ocorreu. Inscrições encerradas.";
                 return RedirectToAction("Detalhes", "Evento", new { id = eventoId });
             }
 
@@ -52,8 +58,8 @@ namespace hackathon.Controllers
 
             // Criar inscrição
             var insertCmd = new SqlCommand(@"
-                INSERT INTO Inscricoes (EventoId, AlunoId, Presente, DataInscricao)
-                VALUES (@EventoId, @AlunoId, 0, GETDATE())", conn);
+        INSERT INTO Inscricoes (EventoId, AlunoId, Presente, DataInscricao)
+        VALUES (@EventoId, @AlunoId, 0, GETDATE())", conn);
             insertCmd.Parameters.AddWithValue("@EventoId", eventoId);
             insertCmd.Parameters.AddWithValue("@AlunoId", UsuarioId);
             insertCmd.ExecuteNonQuery();

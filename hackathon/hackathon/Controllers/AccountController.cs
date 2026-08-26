@@ -90,7 +90,7 @@ namespace hackathon.Controllers
             using var conn = _db.GetConnection();
 
             var checkCmd = new SqlCommand("SELECT COUNT(1) FROM Usuarios WHERE Email = @Email", conn);
-            checkCmd.Parameters.AddWithValue("@Email", model.Email);
+            checkCmd.Parameters.AddWithValue("@Email", model.Email.Trim());
             var existe = (int)checkCmd.ExecuteScalar();
             if (existe > 0)
             {
@@ -98,15 +98,25 @@ namespace hackathon.Controllers
                 return View(model);
             }
 
-            var insertCmd = new SqlCommand(
-                @"INSERT INTO Usuarios (Nome, Email, Senha, Perfil)
-                  VALUES (@Nome, @Email, @Senha, @Perfil)", conn);
-            insertCmd.Parameters.AddWithValue("@Nome", model.Nome);
-            insertCmd.Parameters.AddWithValue("@Email", model.Email);
-            insertCmd.Parameters.AddWithValue("@Senha", SenhaService.Hash(model.Senha));
-            insertCmd.Parameters.AddWithValue("@Perfil", model.Perfil);
-            insertCmd.ExecuteNonQuery();
+            try
+            {
+                var insertCmd = new SqlCommand(
+                    @"INSERT INTO Usuarios (Nome, Email, Senha, Perfil)
+              VALUES (@Nome, @Email, @Senha, @Perfil)", conn);
+                insertCmd.Parameters.AddWithValue("@Nome", model.Nome.Trim());
+                insertCmd.Parameters.AddWithValue("@Email", model.Email.Trim());
+                insertCmd.Parameters.AddWithValue("@Senha", SenhaService.Hash(model.Senha));
+                insertCmd.Parameters.AddWithValue("@Perfil", model.Perfil);
+                insertCmd.ExecuteNonQuery();
+            }
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+            {
+                // Violação de UNIQUE (email duplicado por concorrência)
+                ModelState.AddModelError("", "Este email já está cadastrado.");
+                return View(model);
+            }
 
+            TempData["Sucesso"] = "Cadastro realizado! Faça login para continuar.";
             return RedirectToAction("Login");
         }
 
