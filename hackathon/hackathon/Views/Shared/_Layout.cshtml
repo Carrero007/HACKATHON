@@ -1,11 +1,10 @@
-@using System.Security.Claims
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] - Eventos Acadêmicos</title>
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header class="topbar">
@@ -18,17 +17,16 @@
 
                 @if (User.Identity!.IsAuthenticated)
                 {
+                    if (User.IsInRole("ALUNO"))
+                    {
+                        <a asp-controller="Inscricao" asp-action="MinhasInscricoes">Minhas inscrições</a>
+                    }
                     if (User.IsInRole("CRIADOR"))
                     {
                         <a asp-controller="Evento" asp-action="MeusEventos">Meus eventos</a>
                         <a asp-controller="Evento" asp-action="Criar">Criar evento</a>
                     }
-                    else if (User.IsInRole("ALUNO"))
-                    {
-                        <a asp-controller="Inscricao" asp-action="MinhasInscricoes">Minhas inscrições</a>
-                    }
-
-                    <span class="user-tag">@User.Identity!.Name</span>
+                    <span class="user-tag">Olá, @User.Identity!.Name</span>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="inline-form">
                         <button type="submit" class="link-btn">Sair</button>
                     </form>
@@ -36,20 +34,18 @@
                 else
                 {
                     <a asp-controller="Account" asp-action="Login">Login</a>
-                    <a asp-controller="Account" asp-action="Cadastro" class="cta-ghost">Cadastro</a>
+                    <a class="cta-ghost" asp-controller="Account" asp-action="Cadastro">Criar conta</a>
                 }
             </nav>
         </div>
     </header>
 
-    <main class="container">
+    <main>
         @RenderBody()
     </main>
 
     <footer class="footer">
-        <span>Eventos Acadêmicos — projeto de hackathon</span>
+        &copy; @DateTime.Now.Year — Eventos Acadêmicos. Todos os direitos reservados.
     </footer>
-
-    @RenderSection("Scripts", required: false)
 </body>
 </html>

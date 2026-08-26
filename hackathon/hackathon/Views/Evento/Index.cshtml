@@ -1,15 +1,55 @@
 ﻿@model List<hackathon.Models.Evento>
-<h2>Eventos</h2>
-@if (User.IsInRole("CRIADOR"))
-{
-    <a asp-action="Criar">Criar evento</a>
-}
-<ul>
-    @foreach (var e in Model)
+
+<section class="hero">
+    <div class="hero-inner">
+        <span class="hero-eyebrow">🎓 Programa de eventos</span>
+        <h1>Participe, aprenda e conquiste seu certificado.</h1>
+        <p class="lead">
+            Acompanhe os próximos eventos acadêmicos, inscreva-se em um clique
+            e confirme sua presença direto pelo celular no dia do evento.
+        </p>
+        @if (User.IsInRole("CRIADOR"))
+        {
+            <div class="hero-actions">
+                <a asp-action="Criar" class="btn-primary">Criar evento</a>
+                <a asp-action="MeusEventos" class="btn-outline">Meus eventos</a>
+            </div>
+        }
+    </div>
+</section>
+
+<div class="stat-strip">
+    <div class="stat-strip-inner">
+        <div><span class="stat-num">@Model.Count</span><span class="stat-label">Eventos publicados</span></div>
+        <div><span class="stat-num">100%</span><span class="stat-label">Check-in digital</span></div>
+        <div><span class="stat-num">1 clique</span><span class="stat-label">Para se inscrever</span></div>
+        <div><span class="stat-num">Automático</span><span class="stat-label">Certificado ao concluir</span></div>
+    </div>
+</div>
+
+<div class="container">
+    <span class="section-label">Cronograma</span>
+    <h2>Próximos eventos</h2>
+
+    @if (!Model.Any())
     {
-        <li>
-            <strong>@e.Titulo</strong> - @e.DataHora.ToString("dd/MM/yyyy HH:mm") - @e.Local
-            <a asp-action="Detalhes" asp-route-id="@e.Id">Ver detalhes</a>
-        </li>
+        <p>Nenhum evento publicado no momento.</p>
     }
-</ul>
+    else
+    {
+        <ul class="event-grid">
+            @foreach (var e in Model)
+            {
+                <li class="event-card">
+                    <span class="badge-date">📅 @e.DataHora.ToString("dd/MM/yyyy · HH:mm")</span>
+                    <h3>@e.Titulo</h3>
+                    <p class="meta">📍 @e.Local</p>
+                    <p class="meta">Organizado por @e.CriadorNome</p>
+                    <div class="actions">
+                        <a asp-action="Detalhes" asp-route-id="@e.Id">Ver detalhes →</a>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

@@ -1,67 +1,100 @@
 ﻿@model hackathon.Models.Evento
-<h2>@Model.Titulo</h2>
-@if (TempData["Sucesso"] != null)
-{
-    <p style="color:green">✓ @TempData["Sucesso"]</p>
-}
-@if (TempData["Erro"] != null)
-{
-    <p style="color:red">@TempData["Erro"]</p>
-}
-<p>@Model.Descricao</p>
-<p>Data: @Model.DataHora.ToString("dd/MM/yyyy HH:mm")</p>
-<p>Local: @Model.Local</p>
-<p>Criador: @Model.CriadorNome</p>
 
-@if (User.IsInRole("ALUNO"))
-{
-    if (Model.JaInscrito)
+<div class="container-narrow">
+
+    @if (TempData["Sucesso"] != null)
     {
-        <p>✓ INSCRITO</p>
+        <p class="alert alert-success">✓ @TempData["Sucesso"]</p>
     }
-    else
+    @if (TempData["Erro"] != null)
     {
-        <form asp-controller="Inscricao" asp-action="Participar" method="post">
-            <input type="hidden" name="eventoId" value="@Model.Id" />
-            <button type="submit">PARTICIPAR</button>
-        </form>
+        <p class="alert alert-error">@TempData["Erro"]</p>
     }
-}
 
-@if (User.Identity!.IsAuthenticated && User.FindFirst("UsuarioId")!.Value == Model.CriadorId.ToString())
-{
-    <a asp-action="Editar" asp-route-id="@Model.Id">EDITAR</a>
-    <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" style="display:inline">
-        <button type="submit">EXCLUIR</button>
-    </form>
+    <div class="event-detail-hero">
+        <h2>@Model.Titulo</h2>
+        <p>@Model.Descricao</p>
+        <div class="meta-row">
+            <span>📅 @Model.DataHora.ToString("dd/MM/yyyy HH:mm")</span>
+            <span>📍 @Model.Local</span>
+        </div>
+        <span class="creator-pill">👤 Organizado por @Model.CriadorNome</span>
 
-    <hr />
-    <h3>QR CODE DE PRESENÇA</h3>
-    <div id="qrcode"></div>
-    <p>Escaneie este código para confirmar sua presença.</p>
+        <div class="actions-row">
+            @if (User.IsInRole("ALUNO"))
+            {
+                if (Model.JaInscrito)
+                {
+                    <span class="inscrito-tag">✓ Inscrito</span>
+                }
+                else
+                {
+                    <form asp-controller="Inscricao" asp-action="Participar" method="post" class="inline-form">
+                        <input type="hidden" name="eventoId" value="@Model.Id" />
+                        <button type="submit" class="btn-primary" style="margin-top:0;">Participar</button>
+                    </form>
+                }
+            }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        new QRCode(document.getElementById("qrcode"), {
-            text: window.location.origin + "/Presenca/Confirmar?eventoId=@Model.Id",
-            width: 180,
-            height: 180
-        });
-    </script>
-}
+            @if (User.Identity!.IsAuthenticated && User.FindFirst("UsuarioId")!.Value == Model.CriadorId.ToString())
+            {
+                <a class="btn-outline" asp-action="Editar" asp-route-id="@Model.Id">Editar</a>
+                <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" class="inline-form">
+                    <button type="submit" style="background:transparent;border:1.5px solid rgba(229,72,77,.5);color:#ffb4b4;margin-top:0;">Excluir</button>
+                </form>
+            }
+        </div>
+    </div>
 
-<hr />
-<h3>Comentários</h3>
-@foreach (var c in (List<hackathon.Models.Comentario>)ViewBag.Comentarios)
-{
-    <p><strong>@c.UsuarioNome:</strong> @c.Texto</p>
-}
+    @if (User.Identity!.IsAuthenticated && User.FindFirst("UsuarioId")!.Value == Model.CriadorId.ToString())
+    {
+        <div class="checkin-panel">
+            <div class="checkin-copy">
+                <span class="section-label">Check-in de presença</span>
+                <h3>📲 Projete este QR code no dia do evento</h3>
+                <p class="meta" style="color:var(--ink-soft)">
+                    Este código só aparece pra você, o organizador. Ele não confirma nada sozinho —
+                    é o aluno quem escaneia com o próprio celular, já logado, pra registrar a presença dele.
+                </p>
+                <ol>
+                    <li>Você exibe (projeta ou compartilha) este QR code durante o evento.</li>
+                    <li>Cada aluno inscrito escaneia com o celular, logado na própria conta.</li>
+                    <li>O aluno confirma a presença na tela que abrir.</li>
+                    <li>Com a presença confirmada, o certificado é liberado automaticamente pra ele.</li>
+                </ol>
+            </div>
+            <div class="qr-box">
+                <div id="qrcode"></div>
+                <p class="qr-caption">Aponte a câmera do celular para escanear</p>
+            </div>
+        </div>
 
-@if (User.Identity!.IsAuthenticated)
-{
-    <form asp-controller="Comentario" asp-action="Criar" method="post">
-        <input type="hidden" name="eventoId" value="@Model.Id" />
-        <textarea name="texto" placeholder="Escreva um comentário"></textarea>
-        <button type="submit">COMENTAR</button>
-    </form>
-}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        <script>
+            new QRCode(document.getElementById("qrcode"), {
+                text: window.location.origin + "/Presenca/Confirmar?eventoId=@Model.Id",
+                width: 160,
+                height: 160
+            });
+        </script>
+    }
+
+    <div class="comments-section">
+        <span class="section-label">Discussão</span>
+        <h3>Comentários</h3>
+
+        @foreach (var c in (List<hackathon.Models.Comentario>)ViewBag.Comentarios)
+        {
+            <div class="comment"><strong>@c.UsuarioNome:</strong> @c.Texto</div>
+        }
+
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <form asp-controller="Comentario" asp-action="Criar" method="post" style="max-width:100%;margin-top:16px;">
+                <input type="hidden" name="eventoId" value="@Model.Id" />
+                <textarea name="texto" placeholder="Escreva um comentário"></textarea>
+                <button type="submit">Comentar</button>
+            </form>
+        }
+    </div>
+</div>
