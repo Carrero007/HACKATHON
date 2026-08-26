@@ -1,0 +1,55 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Eventos Acadêmicos</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" asp-controller="Evento" asp-action="Index">
+                <span class="brand-mark">EA</span> Eventos Acadêmicos
+            </a>
+            <nav class="menu">
+                <a asp-controller="Evento" asp-action="Index">Eventos</a>
+
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    if (User.IsInRole("CRIADOR"))
+                    {
+                        <a asp-controller="Evento" asp-action="MeusEventos">Meus eventos</a>
+                        <a asp-controller="Evento" asp-action="Criar">Criar evento</a>
+                    }
+                    else if (User.IsInRole("ALUNO"))
+                    {
+                        <a asp-controller="Evento" asp-action="Index">Minhas inscrições</a>
+                    }
+
+                    <span class="user-tag">@User.FindFirst("Nome")?.Value</span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="inline-form">
+                        <button type="submit" class="link-btn">Sair</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login">Login</a>
+                    <a asp-controller="Account" asp-action="Cadastro" class="cta-ghost">Cadastro</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <span>Eventos Acadêmicos — projeto de hackathon</span>
+    </footer>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
