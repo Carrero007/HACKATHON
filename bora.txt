@@ -1,0 +1,908 @@
+👨‍💻 DEV 1 — BACKEND, BANCO E REGRAS
+Objetivo
+
+Entregar uma API/camada MVC completamente funcional para que o Dev 2 consiga simplesmente conectar as telas.
+
+Responsável por
+Banco SQL Server
+Models C#
+Conexão com banco
+Login
+Cadastro
+Sessão
+Perfis
+Autorização
+Eventos
+Inscrições
+Comentários
+Check-in
+Certificados
+Validações
+Regras de segurança
+NÃO é responsabilidade dele
+Design
+CSS
+HTML bonito
+Responsividade
+QR visual
+Layout do certificado
+DEV 1 — ETAPA 1
+Criar o projeto
+
+Começar com:
+
+ASP.NET Core MVC
+C#
+SQL Server LocalDB
+ADO.NET
+
+Estrutura:
+
+Controllers/
+Models/
+Data/
+Services/
+Views/
+wwwroot/
+
+Criar o projeto e garantir:
+
+dotnet run
+
+funcionando.
+
+Entrega
+
+O projeto abre no navegador.
+
+DEV 1 — ETAPA 2
+Banco de dados
+
+Criar:
+
+Usuarios
+Id
+Nome
+Email
+Senha
+Perfil
+Eventos
+Id
+CriadorId
+Titulo
+Descricao
+DataHora
+Local
+Publicado
+Inscricoes
+Id
+EventoId
+AlunoId
+Presente
+DataInscricao
+Comentarios
+Id
+EventoId
+UsuarioId
+Texto
+DataComentario
+Regra importante
+EventoId + AlunoId
+
+deve ser único em Inscricoes.
+
+Isso impede inscrição duplicada.
+
+DEV 1 — ETAPA 3
+Criar Models
+
+Criar:
+
+Usuario.cs
+Evento.cs
+Inscricao.cs
+Comentario.cs
+
+Não criar Models desnecessários.
+
+DEV 1 — ETAPA 4
+Conexão SQL
+
+Criar:
+
+Data/Database.cs
+
+Responsável por abrir conexão:
+
+SqlConnection
+
+e executar queries parametrizadas.
+
+Nunca concatenar dados do usuário diretamente no SQL.
+
+Errado:
+
+"SELECT * FROM Usuarios WHERE Email = '" + email + "'"
+
+Correto:
+
+"SELECT * FROM Usuarios WHERE Email = @Email"
+DEV 1 — ETAPA 5
+Login e cadastro
+
+Criar:
+
+AccountController.cs
+
+Funcionalidades:
+
+GET  /Account/Login
+POST /Account/Login
+
+GET  /Account/Cadastro
+POST /Account/Cadastro
+
+GET /Account/Logout
+
+Depois do login, criar Claims:
+
+UsuarioId
+Nome
+Perfil
+
+Perfis:
+
+ALUNO
+CRIADOR
+DEV 1 — ETAPA 6
+Permissões
+
+Essa é uma das partes mais importantes.
+
+Criador pode:
+Criar evento
+Editar próprio evento
+Excluir próprio evento
+Ver inscritos
+Comentar
+Aluno pode:
+Ver eventos
+Inscrever-se
+Comentar
+Fazer check-in
+Ver certificado
+Aluno NÃO pode:
+Criar evento
+Editar evento
+Excluir evento
+Criador NÃO pode editar evento de outro criador.
+
+Essa verificação precisa estar no backend.
+
+DEV 1 — ETAPA 7
+Eventos
+
+Criar:
+
+EventoController.cs
+
+Endpoints:
+
+GET  /Evento
+GET  /Evento/Detalhes/{id}
+
+GET  /Evento/Criar
+POST /Evento/Criar
+
+GET  /Evento/Editar/{id}
+POST /Evento/Editar/{id}
+
+POST /Evento/Excluir/{id}
+Criar evento
+
+Somente:
+
+Perfil = CRIADOR
+Editar
+
+Verificar:
+
+Evento.CriadorId == UsuarioLogado.Id
+DEV 1 — ETAPA 8
+Inscrições
+
+Criar:
+
+InscricaoController.cs
+
+Endpoint:
+
+POST /Inscricao/Participar
+
+Fluxo:
+
+Aluno logado
+      ↓
+Evento existe?
+      ↓
+Evento publicado?
+      ↓
+Já inscrito?
+      ↓
+Não
+      ↓
+Criar inscrição
+DEV 1 — ETAPA 9
+Comentários
+
+Criar:
+
+ComentarioController.cs
+
+Endpoint:
+
+POST /Comentario/Criar
+
+Receber:
+
+EventoId
+Texto
+
+Não receber UsuarioId do formulário.
+
+Pegar o usuário através do login.
+
+DEV 1 — ETAPA 10
+Check-in
+
+Criar:
+
+PresencaController.cs
+
+Endpoints:
+
+GET  /Presenca/Confirmar?eventoId=10
+POST /Presenca/Confirmar
+
+Regra:
+
+Aluno está logado?
+        ↓
+Está inscrito?
+        ↓
+SIM
+        ↓
+Presente = 1
+
+Se não estiver inscrito:
+
+Erro: aluno não está inscrito.
+DEV 1 — ETAPA 11
+Certificado
+
+Criar:
+
+CertificadoController.cs
+
+Endpoint:
+
+GET /Certificado/Emitir/{eventoId}
+
+Só retornar certificado se:
+
+Inscricao.Presente == 1
+
+Caso contrário:
+
+Certificado indisponível.
+DEV 1 — ETAPA 12
+Entrega do backend
+
+Antes de entregar para o Dev 2, testar sem depender da interface bonita.
+
+Ele precisa conseguir provar:
+
+LOGIN
+ ↓
+CRIAR EVENTO
+ ↓
+INSCRIÇÃO
+ ↓
+COMENTÁRIO
+ ↓
+CHECK-IN
+ ↓
+CERTIFICADO
+Checklist do Dev 1
+ Projeto executa
+ Banco funciona
+ Cadastro funciona
+ Login funciona
+ Logout funciona
+ Perfil funciona
+ Criador cria evento
+ Criador edita próprio evento
+ Criador não edita evento de outro criador
+ Aluno não cria evento
+ Aluno não edita evento
+ Aluno se inscreve
+ Inscrição duplicada bloqueada
+ Comentário funciona
+ Check-in funciona
+ Certificado só aparece com presença
+👨‍💻 DEV 2 — FRONTEND E EXPERIÊNCIA
+Objetivo
+
+Transformar os endpoints do Dev 1 em uma aplicação simples, funcional e fácil de demonstrar.
+
+Responsável por
+Layout
+Menu
+Login
+Cadastro
+Cronograma
+Detalhes
+Formulários
+Área do criador
+Área do aluno
+Comentários
+QR Code
+Check-in
+Certificado
+JavaScript
+CSS básico
+Responsividade mínima
+NÃO é responsabilidade dele
+Criar tabelas SQL
+Alterar regras do banco
+Implementar autorização
+Criar lógica de negócio no frontend
+Confiar em JavaScript para segurança
+DEV 2 — ETAPA 1
+Criar layout base
+
+Criar:
+
+Views/Shared/_Layout.cshtml
+
+Menu básico.
+
+Visitante
+Eventos
+Login
+Cadastro
+Aluno
+Eventos
+Minhas inscrições
+Certificados
+Sair
+Criador
+Eventos
+Meus eventos
+Criar evento
+Sair
+DEV 2 — ETAPA 2
+Login e cadastro
+
+Criar:
+
+Views/Account/Login.cshtml
+Views/Account/Cadastro.cshtml
+
+Login:
+
+Email
+Senha
+
+[ENTRAR]
+
+Cadastro:
+
+Nome
+Email
+Senha
+Perfil
+
+[CADASTRAR]
+
+Para simplificar, pode permitir escolher:
+
+Aluno
+Criador
+
+Se isso fizer sentido para a avaliação.
+
+DEV 2 — ETAPA 3
+Cronograma
+
+Criar:
+
+Views/Evento/Index.cshtml
+
+Mostrar eventos:
+
+Workshop de Tecnologia
+10/09/2026 - 19:00
+Auditório Principal
+
+[VER DETALHES]
+
+Não precisa de card sofisticado.
+
+Uma lista simples já resolve.
+
+DEV 2 — ETAPA 4
+Detalhes do evento
+
+Criar:
+
+Views/Evento/Detalhes.cshtml
+
+Mostrar:
+
+Título
+Descrição
+Data
+Hora
+Local
+Criador
+
+Se aluno:
+
+[PARTICIPAR]
+
+Se já inscrito:
+
+✓ INSCRITO
+
+Se criador dono:
+
+[EDITAR]
+[EXCLUIR]
+DEV 2 — ETAPA 5
+Área do criador
+
+Criar:
+
+Views/Evento/Criar.cshtml
+Views/Evento/Editar.cshtml
+
+Formulário:
+
+Título
+Descrição
+Data
+Hora
+Local
+
+[PUBLICAR]
+
+Depois criar uma lista:
+
+MEUS EVENTOS
+
+Workshop
+10/09/2026
+
+[EDITAR]
+[EXCLUIR]
+[VER]
+DEV 2 — ETAPA 6
+Inscrição
+
+No detalhe do evento:
+
+[ PARTICIPAR ]
+
+Ao clicar:
+
+POST /Inscricao/Participar
+
+Mostrar:
+
+✓ Inscrição realizada!
+
+ou:
+
+Você já está inscrito.
+DEV 2 — ETAPA 7
+Comentários
+
+Na página de detalhes:
+
+COMENTÁRIOS
+
+Maria:
+Ótimo evento!
+
+João:
+Vai ter certificado?
+
+--------------------
+
+[Escreva um comentário]
+
+[COMENTAR]
+DEV 2 — ETAPA 8
+QR Code
+
+Adicionar qrcode.js.
+
+Na tela do evento:
+
+QR CODE DE PRESENÇA
+
+[ QR ]
+
+Escaneie este código para
+confirmar sua presença.
+
+QR deve apontar para:
+
+/Presenca/Confirmar?eventoId=ID
+
+Para demonstração em celular, testar usando o IP da máquina na rede.
+
+DEV 2 — ETAPA 9
+Check-in
+
+Criar:
+
+Views/Presenca/Confirmar.cshtml
+
+Mostrar:
+
+CONFIRMAÇÃO DE PRESENÇA
+
+Workshop de Tecnologia
+
+[ CONFIRMAR PRESENÇA ]
+
+Depois:
+
+✓ Presença confirmada!
+
+E:
+
+[ VER CERTIFICADO ]
+DEV 2 — ETAPA 10
+Certificado
+
+Criar:
+
+Views/Certificado/Emitir.cshtml
+
+Visual básico:
+
+=========================================
+
+              CERTIFICADO
+
+       Certificamos que
+
+            MARIA SILVA
+
+     participou do evento
+
+       WORKSHOP DE TECNOLOGIA
+
+        realizado em
+          10/09/2026
+
+
+       ___________________
+            Organização
+
+=========================================
+
+[ IMPRIMIR ]
+
+JavaScript:
+
+window.print();
+
+E CSS:
+
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+DEV 2 — ETAPA 11
+Entrega do frontend
+
+Testar:
+
+ Login
+ Cadastro
+ Cronograma
+ Detalhes
+ Criador cria evento
+ Criador edita
+ Aluno se inscreve
+ Comentário
+ QR
+ Check-in
+ Certificado
+ Impressão
+🔥 DIVISÃO DOS ARQUIVOS
+
+Para evitar conflito no Git:
+
+Dev 1 mexe principalmente em:
+Controllers/
+Models/
+Data/
+Services/
+Program.cs
+appsettings.json
+Dev 2 mexe principalmente em:
+Views/
+wwwroot/
+
+Isso reduz muito os conflitos.
+
+Se precisar alterar Program.cs, o Dev 1 faz.
+
+🤖 COMO USAR A CLAUDE
+
+Aqui está uma estratégia importante.
+
+Não mandem o projeto inteiro para a Claude e peçam "faça tudo".
+
+Isso aumenta muito a chance de ela criar arquitetura diferente da que vocês estão usando.
+
+Cada desenvolvedor deve dar um contexto fixo.
+
+Prompt inicial do DEV 1 para a Claude
+
+Copiem algo nesta linha:
+
+Estou desenvolvendo um sistema de eventos acadêmicos em ASP.NET Core MVC com C# e SQL Server LocalDB.
+
+Você é meu assistente de BACKEND.
+
+Minha responsabilidade é exclusivamente:
+- Banco de dados
+- Models C#
+- Controllers
+- ADO.NET
+- Autenticação
+- Autorização
+- Regras de negócio
+- SQL
+- Check-in
+- Certificado
+
+Outro desenvolvedor será responsável pelas Views, HTML, CSS e JavaScript.
+
+Arquitetura obrigatória:
+- ASP.NET Core MVC
+- SQL Server
+- ADO.NET
+- Cookie Authentication
+- Roles ALUNO e CRIADOR
+- Sem Entity Framework
+- Sem React
+- Sem Angular
+- Sem APIs externas
+- Sem arquitetura complexa
+
+Regras:
+1. Criadores podem criar eventos.
+2. Criadores podem editar apenas seus próprios eventos.
+3. Alunos não podem criar ou editar eventos.
+4. Alunos podem se inscrever.
+5. Um aluno não pode se inscrever duas vezes no mesmo evento.
+6. Usuários podem comentar.
+7. Apenas alunos inscritos podem fazer check-in.
+8. Certificado só pode ser emitido quando Presente = 1.
+9. Todas as queries SQL devem ser parametrizadas.
+10. UsuarioId deve vir da sessão/Claims, nunca de dados enviados pelo navegador.
+
+Quando eu pedir código:
+- mostre exatamente quais arquivos precisam ser criados/alterados;
+- não altere arquivos fora da sua responsabilidade sem me avisar;
+- forneça código completo quando a alteração for grande;
+- mantenha a arquitetura simples;
+- priorize funcionalidade sobre abstrações.
+Prompt inicial do DEV 2 para a Claude
+Estou desenvolvendo um sistema de eventos acadêmicos em ASP.NET Core MVC com C#.
+
+Você é meu assistente de FRONTEND.
+
+Minha responsabilidade é exclusivamente:
+- Razor Views
+- HTML
+- CSS
+- JavaScript
+- Navegação
+- Formulários
+- QR Code
+- Tela de check-in
+- Certificado
+- Impressão
+
+Outro desenvolvedor é responsável pelo backend, banco e regras de negócio.
+
+Arquitetura:
+- ASP.NET Core MVC
+- Razor Views
+- HTML/CSS/JavaScript
+- ADO.NET no backend
+- Cookie Authentication
+- Perfis ALUNO e CRIADOR
+
+Prioridade:
+1. Funcionalidade
+2. Integração com Controllers
+3. Usabilidade
+4. Visual básico
+
+Não criar:
+- React
+- Angular
+- APIs novas
+- lógica de segurança no JavaScript
+- banco de dados
+- regras de autorização no frontend
+
+O backend já fornece os Controllers e Actions.
+
+Quando eu pedir código:
+- informe exatamente qual arquivo deve ser alterado;
+- não altere Controllers ou banco;
+- mantenha o HTML simples;
+- use CSS básico;
+- não crie dependências desnecessárias;
+- priorize fazer o fluxo funcionar.
+🚨 REGRA PARA OS DOIS USAREM A CLAUDE
+
+Quando a Claude sugerir uma mudança grande, perguntem:
+
+"Isso é necessário para o MVP ou é uma melhoria arquitetural?"
+
+Se for melhoria arquitetural:
+
+não façam agora.
+
+Exemplo:
+
+Claude:
+
+"Recomendo criar Repository, Service, Interface, UnitOfWork..."
+
+Resposta:
+
+"Não. Mantenha ADO.NET simples. Quero a implementação mínima funcional."
+
+🕐 CRONOGRAMA REAL DE EXECUÇÃO
+08:20–08:40
+Dev 1
+
+Banco + Models + Connection String.
+
+Dev 2
+
+Layout + estrutura de Views.
+
+08:40–09:10
+Dev 1
+
+Login + cadastro + Claims.
+
+Dev 2
+
+Telas Login/Cadastro.
+
+09:10–09:40
+Dev 1
+
+CRUD de Eventos.
+
+Dev 2
+
+Cronograma + detalhes + criação/edição.
+
+09:40–10:00
+Dev 1
+
+Inscrições.
+
+Dev 2
+
+Botão/formulário de inscrição.
+
+10:00–10:20
+Dev 1
+
+Comentários.
+
+Dev 2
+
+Interface de comentários.
+
+10:20–10:40
+Dev 1
+
+Check-in.
+
+Dev 2
+
+QR Code + tela de presença.
+
+10:40–11:00
+Dev 1
+
+Certificado.
+
+Dev 2
+
+Tela do certificado + impressão.
+
+🧪 11:00–11:30 — OS DOIS PARAM DE DESENVOLVER
+
+Nada de nova funcionalidade.
+
+Façam somente QA e integração.
+
+Testem exatamente:
+
+CRIADOR
+   ↓
+LOGIN
+   ↓
+CRIAR EVENTO
+   ↓
+PUBLICAR
+   ↓
+ALUNO
+   ↓
+LOGIN
+   ↓
+VER EVENTO
+   ↓
+INSCREVER
+   ↓
+COMENTAR
+   ↓
+CRIADOR
+   ↓
+VER INSCRITO
+   ↓
+QR CODE
+   ↓
+ALUNO
+   ↓
+CHECK-IN
+   ↓
+PRESENÇA = 1
+   ↓
+CERTIFICADO
+   ↓
+IMPRIMIR
+🏆 Critério para considerar o projeto "entregável"
+
+Se vocês chegarem no final com isso funcionando:
+
+25% — Eventos
+
+Criador publica → aluno visualiza.
+
+25% — Inscrição
+
+Aluno escolhe evento → inscrição fica no banco.
+
+25% — Presença
+
+Aluno inscrito → QR → check-in → Presente = 1.
+
+25% — Certificado
+
+Presente = 1 → certificado → impressão/PDF.
+
+E ainda têm:
+
+login + perfis + comentários + controle de edição.
+
+Nesse ponto, eu não mexeria mais na arquitetura. O restante do tempo deve ser usado exclusivamente para corrigir bugs do fluxo de demonstração.
