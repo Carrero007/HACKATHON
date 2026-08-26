@@ -1,0 +1,34 @@
+﻿@{
+    int eventoId = ViewBag.EventoId;
+    string titulo = ViewBag.TituloEvento;
+    bool inscrito = ViewBag.Inscrito;
+    bool jaConfirmado = ViewBag.JaConfirmado;
+}
+<h2>CONFIRMAÇÃO DE PRESENÇA</h2>
+<h3>@titulo</h3>
+
+@if (TempData["Sucesso"] != null)
+{
+    <p style="color:green">✓ @TempData["Sucesso"]</p>
+}
+@if (TempData["Erro"] != null)
+{
+    <p style="color:red">@TempData["Erro"]</p>
+}
+
+@if (!inscrito)
+{
+    <p>Você não está inscrito neste evento.</p>
+}
+else if (jaConfirmado)
+{
+    <p>✓ Presença já confirmada!</p>
+    <a asp-controller="Certificado" asp-action="Emitir" asp-route-eventoId="@eventoId">VER CERTIFICADO</a>
+}
+else
+{
+    <form asp-action="Confirmar" method="post">
+        <input type="hidden" name="eventoId" value="@eventoId" />
+        <button type="submit">CONFIRMAR PRESENÇA</button>
+    </form>
+}

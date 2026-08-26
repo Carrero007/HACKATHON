@@ -1,0 +1,11 @@
+﻿@model List<hackathon.Models.Evento>
+<h2>Minhas Inscrições</h2>
+<ul>
+    @foreach (var e in Model)
+    {
+        <li>
+            @e.Titulo - @e.DataHora.ToString("dd/MM/yyyy HH:mm") - @e.Local
+            <a asp-controller="Evento" asp-action="Detalhes" asp-route-id="@e.Id">Ver</a>
+        </li>
+    }
+</ul>

@@ -1,0 +1,26 @@
+﻿@{
+    bool disponivel = ViewBag.Disponivel;
+}
+
+@if (!disponivel)
+{
+    <h2>Certificado indisponível</h2>
+    <p>@ViewBag.Mensagem</p>
+}
+else
+{
+    <div>
+        =========================================
+        <h2>CERTIFICADO</h2>
+        <p>Certificamos que</p>
+        <h3>@(((string)ViewBag.NomeAluno).ToUpper())</h3>
+        <p>participou do evento</p>
+        <h3>@(((string)ViewBag.TituloEvento).ToUpper())</h3>
+        <p>realizado em @(((DateTime)ViewBag.DataEvento).ToString("dd/MM/yyyy"))</p>
+        <br />
+        <p>___________________<br />Organização</p>
+        =========================================
+    </div>
+
+    <button class="no-print" onclick="window.print()">IMPRIMIR</button>
+}

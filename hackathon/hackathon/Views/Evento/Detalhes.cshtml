@@ -1,5 +1,13 @@
 ﻿@model hackathon.Models.Evento
 <h2>@Model.Titulo</h2>
+@if (TempData["Sucesso"] != null)
+{
+    <p style="color:green">✓ @TempData["Sucesso"]</p>
+}
+@if (TempData["Erro"] != null)
+{
+    <p style="color:red">@TempData["Erro"]</p>
+}
 <p>@Model.Descricao</p>
 <p>Data: @Model.DataHora.ToString("dd/MM/yyyy HH:mm")</p>
 <p>Local: @Model.Local</p>
@@ -25,5 +33,21 @@
     <a asp-action="Editar" asp-route-id="@Model.Id">EDITAR</a>
     <form asp-action="Excluir" asp-route-id="@Model.Id" method="post" style="display:inline">
         <button type="submit">EXCLUIR</button>
+    </form>
+}
+
+<hr />
+<h3>Comentários</h3>
+@foreach (var c in (List<hackathon.Models.Comentario>)ViewBag.Comentarios)
+{
+    <p><strong>@c.UsuarioNome:</strong> @c.Texto</p>
+}
+
+@if (User.Identity!.IsAuthenticated)
+{
+    <form asp-controller="Comentario" asp-action="Criar" method="post">
+        <input type="hidden" name="eventoId" value="@Model.Id" />
+        <textarea name="texto" placeholder="Escreva um comentário"></textarea>
+        <button type="submit">COMENTAR</button>
     </form>
 }

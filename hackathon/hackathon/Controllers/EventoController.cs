@@ -99,6 +99,32 @@ namespace hackathon.Controllers
                 evento.JaInscrito = (int)checkCmd.ExecuteScalar() > 0;
             }
 
+            var comentarios = new List<Comentario>();
+            var comCmd = new SqlCommand(@"
+    SELECT C.Id, C.EventoId, C.UsuarioId, C.Texto, C.DataComentario, U.Nome AS UsuarioNome
+    FROM Comentarios C
+    JOIN Usuarios U ON U.Id = C.UsuarioId
+    WHERE C.EventoId = @EventoId
+    ORDER BY C.DataComentario", conn);
+            comCmd.Parameters.AddWithValue("@EventoId", id);
+
+            using (var comReader = comCmd.ExecuteReader())
+            {
+                while (comReader.Read())
+                {
+                    comentarios.Add(new Comentario
+                    {
+                        Id = comReader.GetInt32(comReader.GetOrdinal("Id")),
+                        EventoId = comReader.GetInt32(comReader.GetOrdinal("EventoId")),
+                        UsuarioId = comReader.GetInt32(comReader.GetOrdinal("UsuarioId")),
+                        Texto = comReader.GetString(comReader.GetOrdinal("Texto")),
+                        DataComentario = comReader.GetDateTime(comReader.GetOrdinal("DataComentario")),
+                        UsuarioNome = comReader.GetString(comReader.GetOrdinal("UsuarioNome"))
+                    });
+                }
+            }
+
+            ViewBag.Comentarios = comentarios;
             return View(evento);
         }
 
